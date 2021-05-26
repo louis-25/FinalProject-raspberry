@@ -15,6 +15,7 @@ import user_auth as UA
 import audioop
 import os
 import requests, json
+import location
 from requests import get
 from ctypes import *
 
@@ -116,7 +117,7 @@ def detect():
 			#print('audio rms = %d' % (rms))
 
 			if (rc == 1):
-				MS.play_file("../data/sample_yes.wav")
+				MS.play_file("./data/sample_yes.wav")
 				return 200
 
 def btn_detect():
@@ -135,11 +136,11 @@ def btn_detect():
 				btn_status = False			
 			if (rc == 1):
 				GPIO.output(31, GPIO.HIGH)
-				MS.play_file("../data/sample_sound.wav")
+				MS.play_file("./data/sample_sound.wav")
 				return 200
 
 def test(key_word = '기가지니'): #기본값 : 기가지니
-	rc = ktkws.init("../data/kwsmodel.pack")
+	rc = ktkws.init("./data/kwsmodel.pack")
 	print ('init rc = %d' % (rc))
 	rc = ktkws.start()
 	print ('start rc = %d' % (rc))
@@ -154,7 +155,7 @@ def test(key_word = '기가지니'): #기본값 : 기가지니
 
 def btn_test(key_word = '기가지니'):
 	global btn_status
-	rc = ktkws.init("../data/kwsmodel.pack")
+	rc = ktkws.init("./data/kwsmodel.pack")
 	print ('init rc = %d' % (rc))
 	rc = ktkws.start()
 	print ('start rc = %d' % (rc))
@@ -196,7 +197,7 @@ def queryByText(text):
 		#return None
 
 def live_date(): #일일 확진자수 데이터 받아오기
-	url = requests.get("http://192.168.1.3:9091/speaker/daily-patient")
+	url = requests.get("http://192.168.1.3:9091/speaker/patient?day=today")
 	text = url.text
 	print("받아온 데이터 : ",text)
 	
@@ -219,18 +220,15 @@ def main():
 	print(text)
 	word_list = text.split(' ')
 	print(word_list)
-#	text = queryByText(text)
-#	if text == '':
-#		text = '뭐라고 하시는지 못 들었어요. 다시 말씀해주세요 '
-#	elif text == '코로나' or '알려줘':
-#		sum = (str)live_date()
-#		text = '현재 확진자수 ' + sum + '명입니다'
+
 	if '코로나' in word_list:
 		sum = live_date()
 		text = '현재 확진자수 %s명입니다' %(sum)
-#		text = '현재 확진자수 10명입니다' #코로나 확진자수 알려줘
+
 	if '진료소' in word_list:
-		text = '현재 가장 가까운 진료소는 강남성심병원 입니다' #가까운 진료소 알려줘
+		result = location.main()
+		text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
+
 	print("if문 : ",text)
 	output_file = "voicetest.wav"
 	getText2VoiceStream(text,output_file)
