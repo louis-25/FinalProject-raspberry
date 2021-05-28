@@ -50,8 +50,8 @@ def main():
 	method = "GET"
 	basestring = "/geolocation/v2/geoLocation?ip=%s&ext=t&responseFormatType=json" %(IP_ADDRESSS)
 	timestamp = str(int(time.time() * 1000))
-	access_key = "JMJCdzTbIf2ij9A5qpG9"  # access key id (from portal or sub account)
-	secret_key = bytes(str("geylO1EO0jHjaTaqcNvHA3ljwkGj6GfpvVCR3aok"),"utf8")  # secret key (from portal or sub account)
+	access_key = "CB1DD48857B03C6C8200"  # access key id (from portal or sub account)
+	secret_key = bytes(str("133A2CAFBC1F4A6860EA5D253A264A0A0BAD66FB"),"utf8")  # secret key (from portal or sub account)
 	signature = make_signature(method, basestring, timestamp, access_key, secret_key)
 	
 	# GET Request

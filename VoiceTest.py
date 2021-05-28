@@ -16,6 +16,7 @@ import audioop
 import os
 import requests, json
 import location
+import ex5_queryText as dialog # 서버에서 답변가져오기
 from requests import get
 from ctypes import *
 
@@ -124,19 +125,20 @@ def btn_detect():
 	global btn_status
 	with MS.MicrophoneStream(RATE, CHUNK) as stream:
 		audio_generator = stream.generator()
-
+		GPIO.output(31, GPIO.HIGH)
 		for content in audio_generator:
-			GPIO.output(31, GPIO.HIGH)
+#			GPIO.output(31, GPIO.HIGH)
 			rc = ktkws.detect(content)
 			rms = audioop.rms(content,2)
 			print('audio rms = %d' % (rms))
-			GPIO.output(31, GPIO.LOW)
+#			GPIO.output(31, GPIO.LOW)
 			if (btn_status == True):
 				rc = 1
 				btn_status = False			
 			if (rc == 1):
 				GPIO.output(31, GPIO.HIGH)
-				MS.play_file("./data/sample_sound.wav")
+				MS.play_file("./data/sample_yes.wav")
+				GPIO.output(31, GPIO.LOW)
 				return 200
 
 def test(key_word = '기가지니'): #기본값 : 기가지니
@@ -196,43 +198,107 @@ def queryByText(text):
 		print ("Fail: %d" % (response.resultCd))
 		#return None
 
-def live_date(): #일일 확진자수 데이터 받아오기
-	url = requests.get("http://192.168.1.3:9091/speaker/patient?day=today")
+def patient(day, location): #일일 확진자수 데이터 받아오기
+	url = ""
+
+	url = requests.get("http://192.168.1.3:9091/speaker/patient?day=%s&location=%s" %(day, location))
+			
+
+
 	text = url.text
 	print("받아온 데이터 : ",text)
 	
 	data = json.loads(text)
 	sum = data['sum']
 	type(sum)
-	print("일일 확진자 수 : ", sum)
+	print("확진자 수 : ", sum)
 
 	return sum
+
+#def location_
 
 def speaker_ip():#스피커 기준 ip주소 받아오기
 	ip = get("https://api.ipify.org").text
 	print("My public IP address : ", ip)
 
+
+def patient_result(word_list):
+
+	#covid_live
+	location = ["seoul", "incheon", "gwangju", "daejeon", "daegu", "busan", "ulsan", "sejong",
+				"gyeonggi", "gangwon", "chungbuk", "chungnam", "jeonbuk", "jeonnam", "gyeongbuk", 
+				"gyeongnam", "jeju"]
+
+	#covid_result
+	location2 = ["서울", "인천", "광주", "대전", "대구", "부산", "울산", "세종", "경기", 
+					"강원", "충북", "충남","전북", "전남", "경북", "경남", "제주"]
+	
+	check_loc = False
+	for loc in word_list: 
+		if loc in location2:
+			check_loc = loc
+
+	if check_loc == False: #지역 안물어봤을때
+		if '오늘' in word_list:
+			sum = patient('today', 'all') #현재 전체 확진자수
+			text = '현재 확진자수 %s명입니다' %(sum)
+		elif '어제' in word_list:
+			sum = patient('yesterday', check_loc)
+			text = '어제 확진자수 %s명입니다' %(sum)
+		else:
+			sum = patient('today', 'all') #현재 전체 확진자수
+			text = '현재 확진자수 %s명입니다' %(sum)
+
+	else: #지역 물어봤을때
+		if '오늘' in word_list: #covid_live에서 조회한다
+			sum = patient('today', location[location2.index(check_loc)])
+			text = '현재 %s지역 확진자수 %s명입니다' %(check_loc, sum)
+		elif '어제' in word_list: #covid_result에서 조회한다
+			print(check_loc)
+			sum = patient('yesterday', check_loc)
+			text = '어제 %s지역 확진자수 %s명입니다' %(check_loc, sum)
+		else:
+			sum = patient('today', location[location2.index(check_loc)])
+			text = '현재 %s지역 확진자수 %s명입니다' %(check_loc, sum)
+
+
+	return text
+
+	
 def main():
    # STT
-	btn_test()
-	text = ''
-	text = getVoice2Text()
-	print(text)
-	word_list = text.split(' ')
-	print(word_list)
 
-	if '코로나' in word_list:
-		sum = live_date()
-		text = '현재 확진자수 %s명입니다' %(sum)
+#	text = '오늘 인천 지역 확진자 수 알려줘'
+#	word_list = text.split(' ')
+#	text = location_result(word_list)
+#	print(text)
 
-	if '진료소' in word_list:
-		result = location.main()
-		text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
+#	for one in word_list:
+#		if one in location:
+#			print(one)
+#	print(location.contains())
 
-	print("if문 : ",text)
-	output_file = "voicetest.wav"
-	getText2VoiceStream(text,output_file)
-	MS.play_file(output_file)
+	while True:
+		btn_test()
+		text = ''
+		text = getVoice2Text()
+		print(text)
+		word_list = text.split(' ')
+#		location = ['서울', '부산', '대구', '인천', '광주', '대전']
+		print(word_list)
+	
+		if ('코로나'  in word_list) or ('확진자' in word_list):
+			text = patient_result(word_list)
+		elif '진료소' in word_list:
+			result = location.main()
+			text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
+		else:
+			text = dialog.queryByText(text)
+
+		print("if문 : ",text)
+		output_file = "voicetest.wav"
+		getText2VoiceStream(text,output_file)
+		MS.play_file(output_file)
 
 if __name__ == '__main__':
     main()

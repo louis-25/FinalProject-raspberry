@@ -7,6 +7,7 @@ from __future__ import print_function
 
 import pyaudio
 import wave
+import time
 from six.moves import queue
 
 FORMAT = pyaudio.paInt16
@@ -79,6 +80,7 @@ class MicrophoneStream(object):
 # [END audio_stream]
 
 def play_file(fname):
+	
 	# create an audio object
 	wf = wave.open(fname, 'rb')
 	p = pyaudio.PyAudio()
@@ -98,7 +100,7 @@ def play_file(fname):
 		# writing to the stream is what *actually* plays the sound.
 		stream.write(data)
 		data = wf.readframes(chunk)
-
+	time.sleep(0.5) #음성이 끝까지 들리게 잠깐 멈춤
 		# cleanup stuff.
 	stream.close()
 	p.terminate()
