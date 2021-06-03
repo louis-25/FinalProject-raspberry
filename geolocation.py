@@ -30,7 +30,7 @@ def requestApi(timestamp, access_key, signature, uri):
 	response = (res.content).decode('utf-8') #bytes -> str
 	data = json.loads(response)
 	geoLocation = data['geoLocation']
-	result = [geoLocation["r1"],geoLocation["r2"],geoLocation["r3"]]
+	result = [geoLocation["r1"],geoLocation["r2"],geoLocation["r3"],geoLocation["lat"],geoLocation["long"]]
 	#print(result)
 
 	#print(geoLocation["lat"])
