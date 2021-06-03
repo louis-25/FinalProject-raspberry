@@ -17,6 +17,8 @@ import os
 import requests, json
 import location
 import ex5_queryText as dialog # 서버에서 답변가져오기
+import weather #현재 접속지역 날씨정보 받아오기
+
 from requests import get
 from ctypes import *
 
@@ -300,6 +302,8 @@ def main():
 		elif '진료소' in word_list:
 			result = location.main()
 			text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
+		elif '날씨' in word_list:
+			text = weather.main()
 		else:
 			text = dialog.queryByText(text)
 

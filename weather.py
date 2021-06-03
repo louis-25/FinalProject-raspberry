@@ -1,39 +1,18 @@
 
 import geolocation as location
+import requests, json
 
-result = location.main()
-print(result)
-'''
-import requests
-from bs4 import BeautifulSoup
-import pandas
-import matplotlib as mpl
-import matplotlib.pyplot as plt
- 
- 
-source = requests.get('https://www.weather.go.kr/weather/observation/currentweather.jsp')
-soup = BeautifulSoup(source.content,"html.parser")
- 
-table = soup.find('table',{'class':'table_develop3'})
-data = []
- 
-print("#"*30)
-print("\nHello! Here's today's weather!\n")
-print("#"*30)
- 
-for tr in table.find_all('tr'):
-    tds = list(tr.find_all('td'))
-    for td in tds:
-        if td.find('a'):
-            point = td.find('a').text
-            temp = tds[5].text
-            humidity = tds[9].text
-            print("{0:<7} {1:<7} {2:<7}".format(point,temp,humidity))
-            data.append([point,temp,humidity])
- 
-print("#"*30)
-print("\nIt ends here. thanks!\n")
-print("#"*30)
- 
-print(data)
-'''
+def main():
+	result = location.main()
+	r1 = result[0]
+	r2 = result[1]
+	r3 = result[2]
+	lat = result[3]
+	lon = result[4]
+	
+	url = requests.get("http://192.168.1.3:9091/speaker/weather?lat=%s&lon=%s" %(lat, lon))
+	#url = requests.get("http://192.168.1.3:9091/speaker/weather?lat=37.4873799&lon=126.890367")
+	text = '현재 ' + r1 +" "+ r2 +" "+ r3 + '은' +" "+ url.text
+	print(text)
+	
+	return text
