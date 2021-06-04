@@ -18,6 +18,7 @@ import requests, json
 import location
 import ex5_queryText as dialog # 서버에서 답변가져오기
 import weather #현재 접속지역 날씨정보 받아오기
+import news #코로나 최신뉴스 받아오기
 
 from requests import get
 from ctypes import *
@@ -202,7 +203,8 @@ def queryByText(text):
 
 def patient(day, location): #일일 확진자수 데이터 받아오기
 	url = ""
-
+	if location == False:
+		location = 'all'
 	url = requests.get("http://192.168.1.3:9091/speaker/patient?day=%s&location=%s" %(day, location))
 
 	sum = 0
@@ -218,8 +220,6 @@ def patient(day, location): #일일 확진자수 데이터 받아오기
 		print("확진자 수 : ", sum)
 
 	return sum
-
-#def location_
 
 def speaker_ip():#스피커 기준 ip주소 받아오기
 	ip = get("https://api.ipify.org").text
@@ -276,7 +276,7 @@ def patient_result(word_list):
 
 	
 def main():
-   # STT
+# STT
 
 #	text = '오늘 인천 지역 확진자 수 알려줘'
 #	word_list = text.split(' ')
@@ -294,7 +294,6 @@ def main():
 		text = getVoice2Text()
 		print(text)
 		word_list = text.split(' ')
-#		location = ['서울', '부산', '대구', '인천', '광주', '대전']
 		print(word_list)
 	
 		if ('코로나'  in word_list) or ('확진자' in word_list):
@@ -304,6 +303,8 @@ def main():
 			text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
 		elif '날씨' in word_list:
 			text = weather.main()
+		elif '뉴스' in word_list:
+			text = news.main()
 		else:
 			text = dialog.queryByText(text)
 
