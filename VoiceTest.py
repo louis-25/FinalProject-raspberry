@@ -205,10 +205,13 @@ def patient(day, location): #일일 확진자수 데이터 받아오기
 	url = ""
 	if location == False:
 		location = 'all'
-	url = requests.get("http://192.168.1.3:9091/speaker/patient?day=%s&location=%s" %(day, location))
+	#url = requests.get("http://192.168.1.3:9091/speaker/patient?day=%s&location=%s" %(day, location))
+	url = "http://192.168.1.3:9091/speaker/patient"
+	myobj = {'day':day, 'location':location}
+	result = requests.post(url, data = myobj)
 
 	sum = 0
-	text = url.text
+	text = result.text
 	print("받아온 데이터 : ",text)
 
 	if text == '결과값이 없습니다':
@@ -287,6 +290,7 @@ def main():
 #		if one in location:
 #			print(one)
 #	print(location.contains())
+	news_keyword = ['코로나', '날씨', '연애', '건강', '취업', '주식', '경제', '코인']
 
 	while True:
 		btn_test()
@@ -295,16 +299,23 @@ def main():
 		print(text)
 		word_list = text.split(' ')
 		print(word_list)
-	
-		if ('코로나'  in word_list) or ('확진자' in word_list):
+
+		if '뉴스' in word_list:
+			print('word: ',word_list)
+			for keyword in news_keyword:
+				if keyword in word_list:	
+					print('keyword: ',keyword)				
+					text = news.main(keyword)
+					break
+			
+		elif ('코로나'  in word_list) or ('확진자' in word_list):
 			text = patient_result(word_list)
 		elif '진료소' in word_list:
 			result = location.main()
 			text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
 		elif '날씨' in word_list:
 			text = weather.main()
-		elif '뉴스' in word_list:
-			text = news.main()
+		
 		else:
 			text = dialog.queryByText(text)
 

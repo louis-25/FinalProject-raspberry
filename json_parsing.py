@@ -1,6 +1,7 @@
 import requests, json
 
-#url = requests.get("http://192.168.1.3:9091/speaker/daily-patient")
+url = requests.post("http://192.168.1.3:9091/speaker/daily-patient")
+myobj = {''}
 #Google geolocation api
 url = requests.post("https://www.googleapis.com/geolocation/v1/geolocate?key=AIzaSyAul55HBi9_DCpZVtCDwmi4PDmgt3Y-7Os")
 

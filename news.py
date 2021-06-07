@@ -5,8 +5,8 @@ import re
 from datetime import datetime
 import os
 
-def main():	
-	news_url = 'https://search.naver.com/search.naver?where=news&sm=tab_jum&query={코로나}'
+def main(keyword):	
+	news_url = 'https://search.naver.com/search.naver?where=news&sm=tab_jum&query={%s}' %(keyword)
 	
 	req = requests.get(news_url)
 	soup = BeautifulSoup(req.text, 'html.parser')	
