@@ -15,8 +15,9 @@ import user_auth as UA
 import audioop
 import os
 import requests, json
-import location
-import ex5_queryText as dialog # 서버에서 답변가져오기
+import getVaccineCenter # 현재 위치에서 가장 가까운 진료소
+import getPatient # 코로나 확진자 수
+import ex5_queryText as dialog # KT서버에 저장된 답변
 import weather #현재 접속지역 날씨정보 받아오기
 import news #코로나 최신뉴스 받아오기
 
@@ -28,7 +29,7 @@ HOST = 'gate.gigagenie.ai'
 PORT = 4080
 
 KWSID = ['기가지니', '지니야', '친구야', '자기야']
-RATE = 16000
+RATE = 18000
 CHUNK = 512
 
 GPIO.setmode(GPIO.BOARD)
@@ -64,7 +65,6 @@ def generate_request():
             
             rms = audioop.rms(content,2)
             #print_rms(rms)
-
 
 def getVoice2Text():	
     print ("\n\n음성인식을 시작합니다.\n\n종료하시려면 Ctrl+\ 키를 누루세요.\n\n\n")
@@ -200,96 +200,9 @@ def queryByText(text):
 	else:
 		print ("Fail: %d" % (response.resultCd))
 		#return None
-
-def patient(day, location): #일일 확진자수 데이터 받아오기
-	url = ""
-	if location == False:
-		location = 'all'
-	#url = requests.get("http://192.168.1.3:9091/speaker/patient?day=%s&location=%s" %(day, location))
-	url = "http://192.168.1.3:9091/speaker/patient"
-	myobj = {'day':day, 'location':location}
-	result = requests.post(url, data = myobj)
-
-	sum = 0
-	text = result.text
-	print("받아온 데이터 : ",text)
-
-	if text == '결과값이 없습니다':
-		sum = -1	
-	else:
-		data = json.loads(text)
-		sum = data['sum']
-		type(sum)
-		print("확진자 수 : ", sum)
-
-	return sum
-
-def speaker_ip():#스피커 기준 ip주소 받아오기
-	ip = get("https://api.ipify.org").text
-	print("My public IP address : ", ip)
-
-
-def patient_result(word_list):
-
-	#covid_live
-	location = ["seoul", "incheon", "gwangju", "daejeon", "daegu", "busan", "ulsan", "sejong",
-				"gyeonggi", "gangwon", "chungbuk", "chungnam", "jeonbuk", "jeonnam", "gyeongbuk", 
-				"gyeongnam", "jeju"]
-
-	#covid_result
-	location2 = ["서울", "인천", "광주", "대전", "대구", "부산", "울산", "세종", "경기", 
-					"강원", "충북", "충남","전북", "전남", "경북", "경남", "제주"]
-	
-	check_loc = False
-	for loc in word_list: 
-		if loc in location2: #사용자 발화에서 지역관련 단어가 있을때
-			check_loc = loc
-
-	if check_loc == False: #지역 안물어봤을때
-		if '오늘' in word_list:
-			sum = patient('today', 'all') #현재 전체 확진자수
-			if sum == -1:
-				text = '오늘 확진자수가 아직 업데이트되지 않았습니다'
-			else:
-				text = '현재 확진자수 %s명입니다' %(sum)
-		elif '어제' in word_list:
-			sum = patient('yesterday', check_loc)
-			text = '어제 확진자수 %s명입니다' %(sum)
-		else:
-			sum = patient('today', 'all') #현재 전체 확진자수
-			if sum == -1:
-				text = '오늘 확진자수가 아직 업데이트되지 않았습니다'
-			else:
-				text = '현재 확진자수 %s명입니다' %(sum)
-
-	else: #지역 물어봤을때
-		if '오늘' in word_list: #covid_live에서 조회한다
-			sum = patient('today', location[location2.index(check_loc)])
-			text = '현재 %s지역 확진자수 %s명입니다' %(check_loc, sum)
-		elif '어제' in word_list: #covid_result에서 조회한다
-			print(check_loc)
-			sum = patient('yesterday', check_loc)
-			text = '어제 %s지역 확진자수 %s명입니다' %(check_loc, sum)
-		else:
-			sum = patient('today', location[location2.index(check_loc)])
-			text = '현재 %s지역 확진자수 %s명입니다' %(check_loc, sum)
-
-
-	return text
-
 	
 def main():
-# STT
 
-#	text = '오늘 인천 지역 확진자 수 알려줘'
-#	word_list = text.split(' ')
-#	text = location_result(word_list)
-#	print(text)
-
-#	for one in word_list:
-#		if one in location:
-#			print(one)
-#	print(location.contains())
 	news_keyword = ['코로나', '날씨', '연애', '건강', '취업', '주식', '경제', '코인']
 
 	while True:
@@ -308,10 +221,10 @@ def main():
 					text = news.main(keyword)
 					break
 			
-		elif ('코로나'  in word_list) or ('확진자' in word_list):
-			text = patient_result(word_list)
+		elif ('코로나'  in word_list) or ('확진자' in word_list) or ('확진' in word_list):
+			text = getPatient.result(word_list)
 		elif '진료소' in word_list:
-			result = location.main()
+			result = getVaccineCenter.main()
 			text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
 		elif '날씨' in word_list:
 			text = weather.main()
