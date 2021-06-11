@@ -120,7 +120,7 @@ def btn_detect():
 #			GPIO.output(31, GPIO.HIGH)
 			rc = ktkws.detect(content)
 			rms = audioop.rms(content,2)
-			print('audio rms = %d' % (rms))
+#			print('audio rms = %d' % (rms))
 #			GPIO.output(31, GPIO.LOW)
 			if (btn_status == True):
 				rc = 1
@@ -133,9 +133,9 @@ def btn_detect():
 
 def test(key_word = '기가지니'): #기본값 : 기가지니
 	rc = ktkws.init("./data/kwsmodel.pack")
-	print ('init rc = %d' % (rc))
+#	print ('init rc = %d' % (rc))
 	rc = ktkws.start()
-	print ('start rc = %d' % (rc))
+#	print ('start rc = %d' % (rc))
 	print ('\n호출어를 불러보세요~\n')
 	ktkws.set_keyword(KWSID.index(key_word))
 	rc = detect()
@@ -148,10 +148,10 @@ def test(key_word = '기가지니'): #기본값 : 기가지니
 def btn_test(key_word = '기가지니'):
 	global btn_status
 	rc = ktkws.init("./data/kwsmodel.pack")
-	print ('init rc = %d' % (rc))
+#	print ('init rc = %d' % (rc))
 	rc = ktkws.start()
-	print ('start rc = %d' % (rc))
-	print ('\n버튼을 눌러보세요~\n')
+#	print ('start rc = %d' % (rc))
+	print ('\n버튼을 누르거나 기가지니를 불러보세요~\n')
 	ktkws.set_keyword(KWSID.index(key_word))
 	rc = btn_detect()
 	print ('detect rc = %d' % (rc))
