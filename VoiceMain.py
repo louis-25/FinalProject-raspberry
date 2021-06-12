@@ -21,9 +21,9 @@ def main():
 		service.btn_test()
 		text = ''
 		text = service.getVoice2Text()
-		print(text)
+#		print(text)
 		word_list = text.split(' ')
-		print(word_list)
+#		print(word_list)
 
 		if '뉴스' in word_list:
 			print('word: ',word_list)
@@ -37,14 +37,14 @@ def main():
 			text = getPatient.result(word_list)
 		elif '진료소' in word_list:
 			result = getVaccineCenter.main()
-			text = '현재 가장 가까운 진료소는 %s 입니다' %(result) #가까운 진료소 알려줘
+			text = '현재 가장 가까운 진료소는 %s 이고 주소는 %s 입니다' %(result['Facility'], result['Address']) #가까운 진료소 알려줘
 		elif '날씨' in word_list:
 			text = getWeather.main()
 		
 		else:
 			text = dialog.queryByText(text)
 
-		print("if문 : ",text)
+		print('\nresult: ',text)
 		output_file = "voicetest.wav"
 		service.getText2VoiceStream(text,output_file)
 		MS.play_file(output_file)
