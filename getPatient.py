@@ -5,7 +5,7 @@ def patient(day, location): #일일 확진자수 데이터 받아오기
 	if location == False:
 		location = 'all'
 	#url = requests.get("http://192.168.1.3:9091/speaker/getPatient?day=%s&location=%s" %(day, location))
-	url = "http://192.168.1.3:9091/speaker/getPatient"
+	url = "https://corona-114.kro.kr/speaker/getPatient"
 	myobj = {'day':day, 'location':location}
 	result = requests.post(url, data = myobj)
 
